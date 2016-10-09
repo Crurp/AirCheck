@@ -2,74 +2,58 @@
 
 #bbqcheck.sh
 
-##### Wget from newwest bbq event listings on KCBS website
+##### Wget from newest flight deals in US from secretflying.com
 #creates file separated by pipe delimeter
 #data format is as follows
-#first date of event(event may be multiple day event)|Event Name|Location of event(general format is city, 2 letter state code)
-#no guarentee on accuracy of international events
+####first date of event(event may be multiple day event)|Event Name|Location of event(general format is city, 2 letter state code)
 
+wget http://www.secretflying.com/usa-deals
+#Wget to pull webpage of newest items 
 
-wget http://www.kcbs.us/events/new
-#Wget to pull from new list of events at KCBQ
+grep -e '_blank' usa-deals > trim1.txt						#greps keyword for initial data isolation
+grep -e 'spacial-icons-container' trim1.txt > trim2.txt		#greps for special CSS comtained to better isolate data
+cut -d '"' -f 2,4 trim2.txt > trim3.txt						#Using """ as the delimeter, parse out the 2nd and 4th in the list
+sed 's/\"/|/g' trim3.txt > trim4.txt 						#replace """ with "|" to better parse 
+sed 's/&amp;/\&/g' trim4.txt > Final.txt 					#sed command to replace "&amp;" html with acual ampersand symbol "&"
 
-grep -e event new > trim1.txt
-grep '<tr>' trim1.txt > cleanenough.txt
-#grep with key words to clean up html a bit
-
-cut -d '>' -f 7,15,17 cleanenough.txt > DraftFinal.txt
-#cuts argument 7,15,17 parsed out by delimter '>'
-#generally more data sanitization
-
-sed 's/\<br \/\>/|/g' DraftFinal.txt > comma1.txt
-#find and replaces additional html text from data, swaps out for delimeter '|'
-
-sed 's/\<\/a\>/|/g' comma1.txt > comma2.txt
-#find and replaces additional html text from data, swaps out for delimeter '|'
-
-sed 's/\<\/td//g' comma2.txt > comma3.txt
-sed 's/\<br \///g' comma3.txt > FinalCSV.txt
-#Final cleanup and push to final csv file
 
 #-----------------------------------------------------------
 
-#Parse out states and check for desirable state events
+#Parse out states and check for desirable flights
 
-while read input; 			#reads in FinalCSV.txt file for parsing
+while read input; 			#reads in Final.txt file for parsing
 do	
-	location=$(echo $input | tail -c 3)		#extracts the last 3 characters being state code and blank space
+	
+	title=$(echo $input|cut -d '|' -f2)		#extracts the second/last element in the short list which is the title
+	#htmllink=$(echo $input|cut -d '|' -f1)	#extracts the second/last element in the short list which is the link
+	
+	if [[ $title == *"CHICAGO"* ]]
+		then
+  		echo "Fights relate to CHICAGO";
+	fi
 
-	case $location in		#casenotation to check for desirable states
-		"md" | "MD" | "mD" | "Md")
-		clear
-			if ! grep -e "$input" exclude.txt; then
-    			echo -e "New Event listed in Maryland! \n \n $input \n \n Search for it here: http://www.kcbs.us/events/new" | mail -s "BBQ Judging Event Notification" randallvstevens@gmail.com && echo $input >> exclude.txt
-			fi
-		;; #Maryland (md or MD) in location variable with email notification
+	if [[ $title == *"WASHINGTON DC"* ]]
+		then
+  		echo "Fights relate to WASHINNGTON DC";
+	fi
+
+	if [[ $title == *"LOS ANGELES"* ]]
+		then
+  		echo "Fights relate to LOS ANGELES";
+	fi
+
+	if [[ $title == *"BALTIMORE"* ]]
+		then
+  		echo "Fights relate to BALTIMORE";
+	fi
+
+	
+done <FinalTest.txt
 
 
 
-		"ca" | "CA" | "cA" | "Ca")
-		clear
-			if ! grep -e "$input" exclude.txt; then
-    			echo -e "New Event listed in California! \n \n $input \n \n Search for it here: http://www.kcbs.us/events/new" | mail -s "BBQ Judging Event Notification" randallvstevens@gmail.com && echo $input >> exclude.txt
-			fi
-		;; #California (ca or CA) in location variable with email notification
-	esac	#End case 
-done <FinalCSV.txt
 
+#------------Clean Up Files---------------
 
-
-#-----------------------------------------------------------
-#clean up txt files below
-
-rm -rf trim1.txt
-rm -rf cleanenough.txt
-
-rm -rf DraftFinal.txt
-rm -rf FinalCSV.txt
-
-rm -rf comma1.txt
-rm -rf comma2.txt
-rm -rf comma3.txt
-
-rm -rf new*
+rm -rf usa-deals*
+rm -rf trim*
