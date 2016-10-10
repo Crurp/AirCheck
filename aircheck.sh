@@ -25,30 +25,42 @@ while read input; 			#reads in Final.txt file for parsing
 do	
 	
 	title=$(echo $input|cut -d '|' -f2)		#extracts the second/last element in the short list which is the title
-	#htmllink=$(echo $input|cut -d '|' -f1)	#extracts the second/last element in the short list which is the link
+	htmllink=$(echo $input|cut -d '|' -f1)	#extracts the second/last element in the short list which is the link
 	
 	if [[ $title == *"CHICAGO"* ]]
 		then
-  		echo "Fights relate to CHICAGO";
+		if ! grep -e "$title" exclude.txt; 
+			then
+  			echo -e "New Flight related to CHICAGO! \n \n $title \n \n $htmllink" | mail -s "New Secret Flying: CHICAGO" enricochowderson@gmail.com  && echo $title >> exclude.txt
+		fi
 	fi
 
 	if [[ $title == *"WASHINGTON DC"* ]]
 		then
-  		echo "Fights relate to WASHINNGTON DC";
+  		if ! grep -e "$title" exclude.txt; 
+			then
+  			echo -e "New Flight related to WASHINGTON DC! \n \n $title \n \n $htmllink" | mail -s "New Secret Flying: WASHINGTON DC" randallvstevens@gmail.com && echo $title >> exclude.txt
+		fi
 	fi
 
 	if [[ $title == *"LOS ANGELES"* ]]
 		then
-  		echo "Fights relate to LOS ANGELES";
+  		if ! grep -e "$title" exclude.txt; 
+			then
+  			echo -e "New Flight related to LOS ANGELES! \n \n $title \n \n $htmllink" | mail -s "New Secret Flying: LOS ANGELES" randallvstevens@gmail.com enricochowderson@gmail.com && echo $title >> exclude.txt
+		fi
 	fi
 
 	if [[ $title == *"BALTIMORE"* ]]
 		then
-  		echo "Fights relate to BALTIMORE";
+  		if ! grep -e "$title" exclude.txt; 
+			then
+  			echo -e "New Flight related to BALTIMORE! \n \n $title \n \n $htmllink" | mail -s "New Secret Flying: BALTIMORE" randallvstevens@gmail.com && echo $title >> exclude.txt
+		fi
 	fi
 
 	
-done <FinalTest.txt
+done <Final.txt
 
 
 
